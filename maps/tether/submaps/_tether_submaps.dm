@@ -125,6 +125,18 @@
 	name = "Spa"
 	flags = MAP_LEVEL_PLAYER|MAP_LEVEL_SEALED
 
+#include "admin_use/abuse.dm"
+/datum/map_template/tether_lateload/fun/abuse
+	name = "Parable"
+	desc = "If you insist."
+	mappath = 'admin_use/abuse.dmm'
+
+	associated_map_datum = /datum/map_z_level/tether_lateload/fun/abuse
+
+/datum/map_z_level/tether_lateload/fun/abuse
+	name = "Parable"
+	flags = MAP_LEVEL_ADMIN|MAP_LEVEL_SEALED
+
 //////////////////////////////////////////////////////////////////////////////////////
 // Code Shenanigans for Tether lateload maps
 /datum/map_template/tether_lateload
