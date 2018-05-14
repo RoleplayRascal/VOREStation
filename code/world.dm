@@ -454,6 +454,10 @@ var/world_topic_spam_protect_time = world.timeofday
 	shutdown_logging() // Past this point, no logging procs can be used, at risk of data loss.
 	..(reason)
 
+/world/Del()
+	shutdown_logging() // Past this point, no logging procs can be used, at risk of data loss.
+	..()
+
 /hook/startup/proc/loadMode()
 	world.load_mode()
 	return 1
