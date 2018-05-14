@@ -3,20 +3,23 @@
 	name = "mirror"
 	desc = "A SalonPro Nano-Mirror(TM) brand mirror! The leading technology in hair salon products, utilizing nano-machinery to style your hair just right."
 	icon = 'icons/obj/watercloset.dmi'
-	icon_state = "mirror"
+	icon_state = "mirror_frame"
 	density = 0
 	anchored = 1
 	var/shattered = 0
 	var/list/ui_users = list()
 	var/glass = 1
+	var/image/glass_overlay
 
 /obj/structure/mirror/New(var/loc, var/dir, var/building = 0, mob/user as mob)
+	//Don't do anything special if we're just being built
 	if(building)
 		glass = 0
-		icon_state = "mirror_frame"
 		pixel_x = (dir & 3)? 0 : (dir == 4 ? -28 : 28)
 		pixel_y = (dir & 3)? (dir == 1 ? -30 : 30) : 0
-	return
+
+	else
+		visualize()
 
 /obj/structure/mirror/attack_hand(mob/user as mob)
 	if(!glass) return
@@ -34,10 +37,39 @@
 	if(!glass) return
 	if(shattered)	return
 	shattered = 1
+	cut_overlay(glass_overlay)
 	icon_state = "mirror_broke"
+	vis_contents.Cut()
 	playsound(src, "shatter", 70, 1)
 	desc = "Oh no, seven years of bad luck!"
 
+/obj/structure/mirror/proc/visualize()
+	//Give me a nice overlay on a superhigh plane
+	glass_overlay = image("mirror")
+	glass_overlay.plane = ABOVE_PLANE
+
+	//Invert my transform so the vis_contents is backwards
+	var/matrix/M = matrix()
+	switch(dir)
+		if(NORTH)
+			M.Scale(1,-1)
+		if(SOUTH)
+			M.Scale(1,-1)
+		if(EAST)
+			M.Scale(-1,1)
+
+		if(WEST)
+			M.Scale(-1,1)
+	transform = M
+
+	//Add me some vis_contents
+	var/turf/own_turf = get_turf(src)
+	own_turf.layer += 0.01 //Nobody needs to know.......
+	var/turf/T = get_step(own_turf,dir)
+	if(T)
+		vis_contents += T
+
+	add_overlay(glass_overlay)
 
 /obj/structure/mirror/bullet_act(var/obj/item/projectile/Proj)
 
@@ -69,6 +101,8 @@
 			user << "<span class='notice'>You remove the glass.</span>"
 			glass = !glass
 			icon_state = "mirror_frame"
+			cut_overlay(glass_overlay)
+			vis_contents.Cut()
 			new /obj/item/stack/material/glass( src.loc, 2 )
 			return
 
@@ -83,7 +117,7 @@
 				if (G.use(2))
 					shattered = 0
 					glass = 1
-					icon_state = "mirror"
+					visualize()
 					user << "<span class='notice'>You add the glass to the frame.</span>"
 			return
 
